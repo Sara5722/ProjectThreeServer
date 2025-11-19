@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ServerController"
+      spacing="20">
+
+    <Text text="3-Card Poker Server" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Port:"/>
+        <TextField fx:id="portField" prefWidth="100"/>
+        <Button fx:id="startButton" text="Start Server" onAction="#handleStartButton"/>
+        <Button fx:id="stopButton" text="Stop Server" onAction="#handleStopButton"/>
+        <Label fx:id="clientCountLabel" text="Connected Clients: 0" style="-fx-font-weight: bold;"/>
+    </HBox>
+
+    <Text text="Server Log:" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+    <TextArea fx:id="logTextArea" prefHeight="400" editable="false"
+              style="-fx-font-family: monospace;"/>
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+</VBox>
