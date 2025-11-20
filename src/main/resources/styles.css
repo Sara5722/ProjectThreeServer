@@ -36,6 +36,8 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 1, 1);
 }
 
+
+
 .server-button:hover {
     -fx-background-color: linear-gradient(to bottom, #7dace4, #8971d0);
 }
@@ -50,7 +52,7 @@
 }
 
 .stop-button {
-    -fx-background-color: linear-gradient(to bottom, #f44336, #d32f2f) !important;
+    -fx-background-color: linear-gradient(to bottom, #f44336, #977c7c) !important;
 }
 
 .stop-button:hover {
