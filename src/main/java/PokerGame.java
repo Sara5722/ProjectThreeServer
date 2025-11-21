@@ -48,17 +48,24 @@ public class PokerGame {
 
         // Calculate Pair Plus winnings first (independent of dealer)
         int pairPlusWinnings = ThreeCardLogic.evalPPWinnings(playerHand, pairPlusBet);
+        boolean wonPairPlus = pairPlusWinnings > 0;
 
         // Check if dealer qualifies
         boolean dealerQualifies = ThreeCardLogic.dealerQualifies(dealerHand);
 
         int mainGameWinnings = 0;
-        String message = "";
+        StringBuilder message = new StringBuilder();
 
         if (!dealerQualifies) {
             // Dealer doesn't qualify - return ante bet, play wager is push
             mainGameWinnings = anteBet; // Get ante back
-            message = "Dealer does not qualify. Ante returned, play wager push.";
+            message.append("Dealer does not have at least Queen high; ante wager is pushed. ");
+
+            if (wonPairPlus) {
+                message.append("You win Pair Plus: $").append(pairPlusWinnings);
+            } else {
+                message.append("You lose Pair Plus bet.");
+            }
         } else {
             // Dealer qualifies - compare hands
             int comparison = ThreeCardLogic.compareHands(dealerHand, playerHand);
@@ -66,15 +73,33 @@ public class PokerGame {
             if (comparison > 0) {
                 // Player wins
                 mainGameWinnings = (anteBet + playBet) * 2; // 1:1 payout on both bets
-                message = "You beat the dealer!";
+                message.append("You beat the dealer! ");
+
+                if (wonPairPlus) {
+                    message.append("You also win Pair Plus: $").append(pairPlusWinnings);
+                } else {
+                    message.append("But you lose Pair Plus bet.");
+                }
             } else if (comparison < 0) {
                 // Dealer wins
                 mainGameWinnings = 0; // Lose both ante and play
-                message = "Dealer wins.";
+                message.append("You lose to dealer. ");
+
+                if (wonPairPlus) {
+                    message.append("But you win Pair Plus: $").append(pairPlusWinnings);
+                } else {
+                    message.append("You also lose Pair Plus bet.");
+                }
             } else {
                 // Tie - push both bets
                 mainGameWinnings = anteBet + playBet;
-                message = "Push! It's a tie.";
+                message.append("Push! It's a tie. ");
+
+                if (wonPairPlus) {
+                    message.append("You win Pair Plus: $").append(pairPlusWinnings);
+                } else {
+                    message.append("You lose Pair Plus bet.");
+                }
             }
         }
 
@@ -86,7 +111,7 @@ public class PokerGame {
         int totalWinnings = mainGameWinnings + pairPlusWinnings - (anteBet + pairPlusBet + playBet);
 
         result.setTotalWinnings(totalWinnings);
-        result.setGameMessage(message + " Pair Plus: $" + pairPlusWinnings);
+        result.setGameMessage(message.toString());
         result.setPlayerHand(playerHand);
         result.setDealerHand(dealerHand);
 

@@ -53,6 +53,30 @@ public class ClientHandler implements Runnable {
             case "FOLD":
                 processFold();
                 break;
+            case "NEW_GAME":  // ADD THIS CASE
+                // Reset for new game - server will create new PokerGame on next PLACE_BETS
+                server.logGameEvent("Client #" + playerId + " starting new game");
+                break;
+            case "CONTINUE":  // ADD THIS
+                processContinue();
+                break;
+        }
+    }
+
+    private void processContinue() {
+        if (currentGame != null) {
+            // Calculate and send results now that player is ready
+            PokerInfo result = currentGame.calculateResult();
+            result.setMessageType("GAME_RESULT");
+            sendPokerInfo(result);
+
+            String gameLog = buildGameLog(result);
+            server.logGameEvent("Client #" + playerId + " - " + gameLog);
+
+            PokerInfo roundComplete = new PokerInfo("ROUND_COMPLETE");
+            roundComplete.setTotalWinnings(result.getTotalWinnings());
+            roundComplete.setGameMessage(result.getGameMessage());
+            sendPokerInfo(roundComplete);
         }
     }
 
@@ -72,22 +96,66 @@ public class ClientHandler implements Runnable {
                 clientInfo.getAnteBet() + ", Pair Plus $" + clientInfo.getPairPlusBet());
     }
 
+    private String getHandTypeName(int handRank) {
+        switch (handRank) {
+            case ThreeCardLogic.STRAIGHT_FLUSH: return "Straight Flush";
+            case ThreeCardLogic.THREE_OF_A_KIND: return "Three of a Kind";
+            case ThreeCardLogic.STRAIGHT: return "Straight";
+            case ThreeCardLogic.FLUSH: return "Flush";
+            case ThreeCardLogic.PAIR: return "Pair";
+            default: return "High Card";
+        }
+    }
+
     private void processPlay(PokerInfo clientInfo) {
         if (currentGame != null) {
             currentGame.makePlayWager();
 
-            // Show dealer cards
+            // Show dealer cards but DON'T calculate results yet
             PokerInfo showDealer = new PokerInfo("SHOW_DEALER");
             showDealer.setDealerHand(currentGame.getDealerHand());
+
+            // Add dealer hand evaluation for the client to see
+            int dealerHandRank = ThreeCardLogic.evalHand(currentGame.getDealerHand());
+            String dealerHandType = getHandTypeName(dealerHandRank);
+            boolean dealerQualifies = ThreeCardLogic.dealerQualifies(currentGame.getDealerHand());
+
+            showDealer.setGameMessage("Dealer has: " + dealerHandType + " | Qualifies: " + (dealerQualifies ? "YES" : "NO"));
             sendPokerInfo(showDealer);
 
-            // Calculate and send results
-            PokerInfo result = currentGame.calculateResult();
-            sendPokerInfo(result);
+            server.logGameEvent("Client #" + playerId + " playing - dealer cards revealed");
 
-            server.logGameEvent("Client #" + playerId + " played. Result: " +
-                    result.getGameMessage() + " Winnings: $" + result.getTotalWinnings());
+            // STOP HERE - wait for CONTINUE message from client
+            // Results will be calculated when client sends CONTINUE
         }
+    }
+    private String buildGameLog(PokerInfo result) {
+        StringBuilder log = new StringBuilder();
+
+        // Parse the result message to create detailed log
+        String message = result.getGameMessage();
+        if (message.contains("folded")) {
+            log.append("folded - lost Ante and Pair Plus bets");
+        } else if (message.contains("does not qualify")) {
+            log.append("dealer doesn't qualify - ante pushed");
+        } else if (message.contains("beat the dealer")) {
+            log.append("beats dealer");
+            if (message.contains("Pair Plus")) {
+                log.append(" and wins Pair Plus");
+            }
+        } else if (message.contains("loses to dealer")) {
+            log.append("loses to dealer");
+            if (message.contains("Pair Plus")) {
+                log.append(" but wins Pair Plus");
+            } else if (message.contains("loses Pair Plus")) {
+                log.append(" and loses Pair Plus");
+            }
+        } else if (message.contains("Push")) {
+            log.append("push - tie game");
+        }
+
+        log.append(" | Total: $").append(result.getTotalWinnings());
+        return log.toString();
     }
 
     private void processFold() {
@@ -95,11 +163,17 @@ public class ClientHandler implements Runnable {
             int totalLoss = currentGame.getAnteBet() + currentGame.getPairPlusBet();
 
             PokerInfo result = new PokerInfo("GAME_RESULT");
-            result.setGameMessage("You folded and lost your bets.");
+            result.setGameMessage("You folded and lost your Ante and Pair Plus bets.");
             result.setTotalWinnings(-totalLoss);
             sendPokerInfo(result);
 
-            server.logGameEvent("Client #" + playerId + " folded. Lost: $" + totalLoss);
+            // Send round complete
+            PokerInfo roundComplete = new PokerInfo("ROUND_COMPLETE");
+            roundComplete.setTotalWinnings(-totalLoss);
+            roundComplete.setGameMessage("Folded - lost bets");
+            sendPokerInfo(roundComplete);
+
+            server.logGameEvent("Client #" + playerId + " folded - lost: $" + totalLoss);
         }
     }
 
