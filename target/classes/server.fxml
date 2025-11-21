@@ -9,7 +9,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ServerController"
             stylesheets="@styles.css"
-            style="-fx-background-color: linear-gradient(to bottom, #95e8d7, #7dace4);">
+            style="-fx-background-color: #042e67;">
 
     <top>
         <VBox spacing="15" style="-fx-padding: 20;">
@@ -17,7 +17,7 @@
             <HBox alignment="CENTER" spacing="10">
 
                 <Text text="3-Card Poker Server"
-                      style="-fx-font-size: 28; -fx-font-weight: bold; -fx-fill: #8971d0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 10, 0, 2, 2);"/>
+                      style="-fx-font-size: 28; -fx-font-weight: bold; -fx-fill: #000000;;"/>
             </HBox>
 
             <!-- Server Controls -->
@@ -57,7 +57,7 @@
         <HBox alignment="CENTER" style="-fx-padding: 15; -fx-background-color: rgba(0,0,0,0.3);">
             <Text text="Server Status: " style="-fx-fill: white; -fx-font-weight: bold;"/>
             <Text fx:id="serverStatusText" text="Ready to start"
-                  style="-fx-fill: #4CAF50; -fx-font-weight: bold;"/>
+                  style="-fx-fill: #f6e521; -fx-font-weight: bold;"/>
         </HBox>
     </bottom>
 </BorderPane>
