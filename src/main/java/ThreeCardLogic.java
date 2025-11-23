@@ -62,16 +62,18 @@ public class ThreeCardLogic {
     // Check if dealer qualifies (Queen high or better)
     public static boolean dealerQualifies(ArrayList<Card> hand) {
         int rank = evalHand(hand);
-        if (rank >= PAIR) return true; // Pair or better qualifies
+        if (rank >= PAIR) return true;
 
-        // For high card, check if highest card is Queen or better
-        ArrayList<Card> sorted = new ArrayList<>(hand);
-        sorted.sort(Comparator.comparingInt(Card::getValue).reversed());
+        ArrayList<Integer> values = new ArrayList<>();
+        for (Card card : hand) {
+            int value = card.getValue();
+            if (value == 1) value = 14; // Ace as high
+            values.add(value);
+        }
+        Collections.sort(values, Collections.reverseOrder());
 
-        // Adjust Ace value (Ace can be high)
-        int highCard = sorted.get(0).getValue();
-        if (highCard == 1) return true; // Ace is always qualifying
-        return highCard >= 12; // Queen = 12, King = 13
+        int highCard = values.get(0);
+        return highCard >= 12; // Queen=12, King=13, Ace=14
     }
 
     // Helper methods

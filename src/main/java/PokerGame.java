@@ -72,7 +72,7 @@ public class PokerGame {
 
             if (comparison > 0) {
                 // Player wins
-                mainGameWinnings = (anteBet + playBet) * 2; // 1:1 payout on both bets
+                mainGameWinnings = (anteBet + playBet) * 2; //payout on both bets
                 message.append("You beat the dealer! ");
 
                 if (wonPairPlus) {

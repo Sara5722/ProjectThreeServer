@@ -111,11 +111,11 @@ public class ClientHandler implements Runnable {
         if (currentGame != null) {
             currentGame.makePlayWager();
 
-            // Show dealer cards but DON'T calculate results yet
+            // Show dealer cards
             PokerInfo showDealer = new PokerInfo("SHOW_DEALER");
             showDealer.setDealerHand(currentGame.getDealerHand());
 
-            // Add dealer hand evaluation for the client to see
+
             int dealerHandRank = ThreeCardLogic.evalHand(currentGame.getDealerHand());
             String dealerHandType = getHandTypeName(dealerHandRank);
             boolean dealerQualifies = ThreeCardLogic.dealerQualifies(currentGame.getDealerHand());
@@ -125,14 +125,12 @@ public class ClientHandler implements Runnable {
 
             server.logGameEvent("Client #" + playerId + " playing - dealer cards revealed");
 
-            // STOP HERE - wait for CONTINUE message from client
-            // Results will be calculated when client sends CONTINUE
         }
     }
     private String buildGameLog(PokerInfo result) {
         StringBuilder log = new StringBuilder();
 
-        // Parse the result message to create detailed log
+        //check result message for log
         String message = result.getGameMessage();
         if (message.contains("folded")) {
             log.append("folded - lost Ante and Pair Plus bets");
@@ -167,7 +165,7 @@ public class ClientHandler implements Runnable {
             result.setTotalWinnings(-totalLoss);
             sendPokerInfo(result);
 
-            // Send round complete
+            //round complete
             PokerInfo roundComplete = new PokerInfo("ROUND_COMPLETE");
             roundComplete.setTotalWinnings(-totalLoss);
             roundComplete.setGameMessage("Folded - lost bets");
